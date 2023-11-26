@@ -13,13 +13,13 @@ struct CameraView: NSViewRepresentable {
       mediaType:    .video,
       position:     .unspecified
     )
-    guard let device = discoverySession.devices.first(
+    let device = discoverySession.devices.first(
       where: { $0.localizedName == cameraName }
-    ) else {
-      return NSView()
-    }
+    ) ?? discoverySession.devices.first
 
-    guard let input = try? AVCaptureDeviceInput(device: device) else {
+    guard let cameraDevice = device, let input = try? AVCaptureDeviceInput(
+      device: cameraDevice
+    ) else {
       return NSView()
     }
 
@@ -153,7 +153,6 @@ class DraggableWindow: NSWindow {
   }
 
   override func mouseDragged(with event: NSEvent) {
-    let screenVisibleFrame = NSScreen.main!.visibleFrame
     let windowFrame = self.frame
     var newOrigin = windowFrame.origin
 
