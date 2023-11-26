@@ -20,8 +20,15 @@ struct CameraView: NSViewRepresentable {
 
         session.addInput(input)
 
+        let width = UserDefaults.standard.float(forKey: "windowWidth")
+        let height = UserDefaults.standard.float(forKey: "windowHeight")
         let previewLayer = AVCaptureVideoPreviewLayer(session: session)
-        previewLayer.frame = CGRect(x: 0, y: 0, width: 300, height: 300)
+        previewLayer.frame = CGRect(
+          x: 0,
+          y: 0,
+          width: CGFloat(width),
+          height: CGFloat(height)
+        )
         previewLayer.videoGravity = .resizeAspectFill
 
         let view = NSView(frame: previewLayer.frame)
@@ -35,19 +42,41 @@ struct CameraView: NSViewRepresentable {
     func updateNSView(_ nsView: NSView, context: Context) {}
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate /*, NSWindowDelegate*/ {
     var window: NSWindow!
     var cameraName: String = "Elgato Facecam" // Default camera
+    var windowSize: NSSize {
+        didSet {
+            UserDefaults.standard.set(windowSize.width, forKey: "windowWidth")
+            UserDefaults.standard.set(windowSize.height, forKey: "windowHeight")
+        }
+    }
 
+    override init() {
+        // Initialize UserDefaults
+        if UserDefaults.standard.object(forKey: "windowWidth") == nil {
+            UserDefaults.standard.set(200.0, forKey: "windowWidth")
+        }
+        if UserDefaults.standard.object(forKey: "windowHeight") == nil {
+            UserDefaults.standard.set(200.0, forKey: "windowHeight")
+        }
+
+        let width = UserDefaults.standard.float(forKey: "windowWidth")
+        let height = UserDefaults.standard.float(forKey: "windowHeight")
+        windowSize = NSSize(width: CGFloat(width), height: CGFloat(height))
+
+        super.init()
+    }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        let contentRect = NSRect(x: 0, y: 0, width: 480, height: 300)
+        let contentRect = NSRect(x: 0, y: 0, width: windowSize.width, height: windowSize.height)
         window = DraggableWindow(contentRect: contentRect, styleMask: [.borderless], backing: .buffered, defer: false)
         window.isOpaque = false
         window.backgroundColor = NSColor.clear
         window.hasShadow = false
         window.center()
         window.contentView = NSHostingView(rootView: ContentView(cameraName: cameraName))
+        // window.delegate = self
         window.makeKeyAndOrderFront(nil)
         window.level = .floating  // Add this line
 
@@ -127,8 +156,11 @@ struct ContentView: View {
     var cameraName: String
 
     var body: some View {
+        let width = CGFloat(UserDefaults.standard.float(forKey: "windowWidth"))
+        let height = CGFloat(UserDefaults.standard.float(forKey: "windowHeight"))
+
         CameraView(cameraName: cameraName)
-            .frame(width: 480, height: 480)
+            .frame(width: width, height: height)
             .background(Color.clear)
             .clipShape(Circle())
     }
