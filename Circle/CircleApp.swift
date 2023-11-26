@@ -1,24 +1,36 @@
-import SwiftUI
 import AppKit
+import AVFoundation
 import Cocoa
+import SwiftUI
 
-struct CircleView: View {
-    var body: some View {
-        Circle()
-            .fill(Color.blue)
+struct CameraView: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView {
+        let session = AVCaptureSession()
+
+        guard let device = AVCaptureDevice.default(for: .video) else {
+            return NSView()
+        }
+
+        guard let input = try? AVCaptureDeviceInput(device: device) else {
+            return NSView()
+        }
+
+        session.addInput(input)
+
+        let previewLayer = AVCaptureVideoPreviewLayer(session: session)
+        previewLayer.frame = CGRect(x: 0, y: 0, width: 300, height: 300)
+        previewLayer.videoGravity = .resizeAspectFill
+
+        let view = NSView(frame: previewLayer.frame)
+        view.layer = previewLayer
+
+        session.startRunning()
+
+        return view
     }
-}
 
-// class CircleWindow: NSWindow {
-//     override var contentView: NSView? {
-//         didSet {
-//             guard let contentView = contentView else { return }
-//             contentView.wantsLayer = true
-//             contentView.layer?.cornerRadius = contentView.frame.width / 2
-//             contentView.layer?.masksToBounds = true
-//         }
-//     }
-// }
+    func updateNSView(_ nsView: NSView, context: Context) {}
+}
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var window: NSWindow!
@@ -51,8 +63,8 @@ class DraggableWindow: NSWindow {
         let currentLocation = event.locationInWindow
 
         // Update the origin with the difference between the new mouse location and the old mouse location.
-        newOrigin.x += (currentLocation.x - initialLocation.x)
-        newOrigin.y += (currentLocation.y - initialLocation.y)
+        newOrigin.x += (currentLocation.x - (initialLocation?.x ?? 0))
+        newOrigin.y += (currentLocation.y - (initialLocation?.y ?? 0))
 
         // Don't let window get dragged up under the menu bar
         if ((newOrigin.y + windowFrame.size.height) > (screenVisibleFrame.origin.y + screenVisibleFrame.size.height)) {
@@ -75,7 +87,7 @@ class DraggableWindow: NSWindow {
 
 struct ContentView: View {
     var body: some View {
-        CircleView()
+        CameraView()
             .frame(width: 480, height: 480)
             .background(Color.clear)
             .clipShape(Circle())
