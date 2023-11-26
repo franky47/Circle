@@ -50,7 +50,17 @@ struct MainApp: App {
 
     var body: some Scene {
         Settings {
-            // No window is created here.
+        }
+        .commands {
+            CommandGroup(replacing: .appInfo) {
+                Button(action: {
+                    NSApplication.shared.terminate(self)
+                }) {
+                    Text("Quit MainApp")
+
+                }
+                .keyboardShortcut("q", modifiers: .command)
+            }
         }
     }
 }
