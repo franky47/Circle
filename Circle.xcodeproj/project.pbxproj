@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		31DB799A2B12204100A2B30B /* CircleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31DB79992B12204100A2B30B /* CircleApp.swift */; };
-		31DB799C2B12204100A2B30B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31DB799B2B12204100A2B30B /* ContentView.swift */; };
 		31DB799E2B12204300A2B30B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 31DB799D2B12204300A2B30B /* Assets.xcassets */; };
 		31DB79A12B12204300A2B30B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 31DB79A02B12204300A2B30B /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -16,10 +15,10 @@
 /* Begin PBXFileReference section */
 		31DB79962B12204100A2B30B /* Circle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Circle.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		31DB79992B12204100A2B30B /* CircleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleApp.swift; sourceTree = "<group>"; };
-		31DB799B2B12204100A2B30B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		31DB799D2B12204300A2B30B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		31DB79A02B12204300A2B30B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		31DB79A22B12204300A2B30B /* Circle.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Circle.entitlements; sourceTree = "<group>"; };
+		31DB79AA2B12251B00A2B30B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,8 +51,8 @@
 		31DB79982B12204100A2B30B /* Circle */ = {
 			isa = PBXGroup;
 			children = (
+				31DB79AA2B12251B00A2B30B /* Info.plist */,
 				31DB79992B12204100A2B30B /* CircleApp.swift */,
-				31DB799B2B12204100A2B30B /* ContentView.swift */,
 				31DB799D2B12204300A2B30B /* Assets.xcassets */,
 				31DB79A22B12204300A2B30B /* Circle.entitlements */,
 				31DB799F2B12204300A2B30B /* Preview Content */,
@@ -139,7 +138,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				31DB799C2B12204100A2B30B /* ContentView.swift in Sources */,
 				31DB799A2B12204100A2B30B /* CircleApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -266,6 +264,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Circle/Circle.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -274,6 +273,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Circle/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -293,6 +293,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Circle/Circle.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -301,6 +302,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Circle/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
