@@ -13,8 +13,12 @@ struct CameraView: NSViewRepresentable {
       mediaType:    .video,
       position:     .unspecified
     )
+
+    let preferredCameraName = UserDefaults.standard.string(
+      forKey: "cameraSource"
+    )
     let device = discoverySession.devices.first(
-      where: { $0.localizedName == cameraName }
+      where: { $0.localizedName == preferredCameraName }
     ) ?? discoverySession.devices.first
 
     guard let cameraDevice = device, let input = try? AVCaptureDeviceInput(
@@ -142,6 +146,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.contentView = NSHostingView(
           rootView: ContentView(cameraName: cameraName)
         )
+        // Save preference in UserDefaults
+        UserDefaults.standard.set(cameraName, forKey: "cameraSource")
     }
 }
 
