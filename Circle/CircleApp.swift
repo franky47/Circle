@@ -4,10 +4,13 @@ import Cocoa
 import SwiftUI
 
 struct CameraView: NSViewRepresentable {
+    let cameraName: String
+
     func makeNSView(context: Context) -> NSView {
         let session = AVCaptureSession()
 
-        guard let device = AVCaptureDevice.default(for: .video) else {
+        let discoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera, .externalUnknown], mediaType: .video, position: .unspecified)
+        guard let device = discoverySession.devices.first(where: { $0.localizedName == cameraName }) else {
             return NSView()
         }
 
@@ -44,6 +47,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.center()
         window.contentView = NSHostingView(rootView: ContentView())
         window.makeKeyAndOrderFront(nil)
+        window.level = .floating  // Add this line
+
     }
 }
 
@@ -87,7 +92,7 @@ class DraggableWindow: NSWindow {
 
 struct ContentView: View {
     var body: some View {
-        CameraView()
+        CameraView(cameraName: "Elgato Facecam")
             .frame(width: 480, height: 480)
             .background(Color.clear)
             .clipShape(Circle())
@@ -107,7 +112,6 @@ struct MainApp: App {
                     NSApplication.shared.terminate(self)
                 }) {
                     Text("Quit MainApp")
-
                 }
                 .keyboardShortcut("q", modifiers: .command)
             }
