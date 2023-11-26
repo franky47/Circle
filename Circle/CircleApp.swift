@@ -37,6 +37,8 @@ struct CameraView: NSViewRepresentable {
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var window: NSWindow!
+    var cameraName: String = "Elgato Facecam" // Default camera
+
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         let contentRect = NSRect(x: 0, y: 0, width: 480, height: 300)
@@ -45,10 +47,41 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.backgroundColor = NSColor.clear
         window.hasShadow = false
         window.center()
-        window.contentView = NSHostingView(rootView: ContentView())
+        window.contentView = NSHostingView(rootView: ContentView(cameraName: cameraName))
         window.makeKeyAndOrderFront(nil)
         window.level = .floating  // Add this line
 
+        // Create "Camera source" submenu
+        let cameraMenu = NSMenu(title: "Camera source")
+
+        // Get available cameras
+        let discoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera, .externalUnknown], mediaType: .video, position: .unspecified)
+        for device in discoverySession.devices {
+            let menuItem = NSMenuItem(title: device.localizedName, action: #selector(changeCameraSource(_:)), keyEquivalent: "")
+            menuItem.target = self
+            menuItem.state = device.localizedName == cameraName ? .on : .off
+            cameraMenu.addItem(menuItem)
+        }
+
+        // Add "Camera source" submenu to app's menu
+        let mainMenu = NSApp.mainMenu!
+        let cameraMenuItem = NSMenuItem(title: "Camera source", action: nil, keyEquivalent: "")
+        cameraMenuItem.submenu = cameraMenu
+        mainMenu.addItem(cameraMenuItem)
+    }
+
+    @objc func changeCameraSource(_ sender: NSMenuItem) {
+        // Uncheck all items
+        for item in sender.menu!.items {
+            item.state = .off
+        }
+
+        // Check selected item
+        sender.state = .on
+
+        // Change camera source
+        cameraName = sender.title
+        window.contentView = NSHostingView(rootView: ContentView(cameraName: cameraName))
     }
 }
 
@@ -91,8 +124,10 @@ class DraggableWindow: NSWindow {
 }
 
 struct ContentView: View {
+    var cameraName: String
+
     var body: some View {
-        CameraView(cameraName: "Elgato Facecam")
+        CameraView(cameraName: cameraName)
             .frame(width: 480, height: 480)
             .background(Color.clear)
             .clipShape(Circle())
