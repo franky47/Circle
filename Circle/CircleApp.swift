@@ -1,6 +1,5 @@
 import AppKit
 import AVFoundation
-import Cocoa
 import SwiftUI
 
 struct CameraView: NSViewRepresentable {
@@ -73,12 +72,12 @@ class AppDelegate: NSObject, NSApplicationDelegate /*, NSWindowDelegate*/ {
         window = DraggableWindow(contentRect: contentRect, styleMask: [.borderless], backing: .buffered, defer: false)
         window.isOpaque = false
         window.backgroundColor = NSColor.clear
-        window.hasShadow = false
+        window.hasShadow = true
         window.center()
         window.contentView = NSHostingView(rootView: ContentView(cameraName: cameraName))
         // window.delegate = self
         window.makeKeyAndOrderFront(nil)
-        window.level = .floating  // Add this line
+        window.level = .floating
 
         // Create "Camera source" submenu
         let cameraMenu = NSMenu(title: "Camera source")
@@ -132,11 +131,6 @@ class DraggableWindow: NSWindow {
         // Update the origin with the difference between the new mouse location and the old mouse location.
         newOrigin.x += (currentLocation.x - (initialLocation?.x ?? 0))
         newOrigin.y += (currentLocation.y - (initialLocation?.y ?? 0))
-
-        // Don't let window get dragged up under the menu bar
-        if ((newOrigin.y + windowFrame.size.height) > (screenVisibleFrame.origin.y + screenVisibleFrame.size.height)) {
-            newOrigin.y = screenVisibleFrame.origin.y + (screenVisibleFrame.size.height - windowFrame.size.height);
-        }
 
         // Move the window to the new location
         self.setFrameOrigin(newOrigin)
