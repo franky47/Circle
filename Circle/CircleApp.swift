@@ -93,10 +93,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     window.isOpaque = false
     window.backgroundColor = NSColor.clear
     window.hasShadow = true
-    window.center()
     window.contentView = NSHostingView(
       rootView: ContentView(cameraName: cameraName)
     )
+
+    // Restore the window position
+    let xDistanceToEdge = UserDefaults.standard.float(forKey: "windowXDistanceToEdge")
+    let yDistanceToEdge = UserDefaults.standard.float(forKey: "windowYDistanceToEdge")
+    let xEdgeIndex = UserDefaults.standard.integer(forKey: "windowXEdgeIndex")
+    let yEdgeIndex = UserDefaults.standard.integer(forKey: "windowYEdgeIndex")
+
+    // Restore the window screen
+    let screenUUID = UserDefaults.standard.string(forKey: "windowScreenUUID")
+    let screenNumberKey = NSDeviceDescriptionKey("NSScreenNumber")
+    let screenPredicate: (NSScreen) -> Bool = { screen in
+        screen.deviceDescription[screenNumberKey] as? String == screenUUID
+    }
+    let screen = NSScreen.screens.first(where: screenPredicate) ?? NSScreen.main!
+    let newOriginX = xEdgeIndex == 0 ? screen.frame.minX + CGFloat(xDistanceToEdge) : screen.frame.maxX - CGFloat(xDistanceToEdge)
+    let newOriginY = yEdgeIndex == 0 ? screen.frame.minY + CGFloat(yDistanceToEdge) : screen.frame.maxY - CGFloat(yDistanceToEdge)
+    let newOrigin = NSPoint(x: newOriginX, y: newOriginY)
+
+    // Move the window to the new location
+    window.setFrameOrigin(newOrigin)
+
     // window.delegate = self
     window.makeKeyAndOrderFront(nil)
     window.level = .floating
@@ -130,25 +150,66 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     )
     cameraMenuItem.submenu = cameraMenu
     mainMenu.addItem(cameraMenuItem)
+
+    // Create "Screen source" submenu
+    let screenMenu = NSMenu(title: "Target screen")
+
+    // Get available screens
+    for screen in NSScreen.screens {
+        let screenNumber = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber
+        let screenUUID = screenNumber?.stringValue
+        let menuItem = NSMenuItem(title: screen.localizedName, action: #selector(screenSelected(_:)), keyEquivalent: "")
+        menuItem.representedObject = screenUUID
+        menuItem.state = screenUUID == UserDefaults.standard.string(forKey: "windowScreenUUID") ? .on : .off
+        screenMenu.addItem(menuItem)
+    }
+
+    // Add "Screen source" submenu to the menu bar
+    let menuBarItem = NSMenuItem(title: "Target screen", action: nil, keyEquivalent: "")
+    menuBarItem.submenu = screenMenu
+    mainMenu.addItem(menuBarItem)
   }
 
-    @objc func changeCameraSource(_ sender: NSMenuItem) {
-        // Uncheck all items
-        for item in sender.menu!.items {
-            item.state = .off
-        }
-
-        // Check selected item
-        sender.state = .on
-
-        // Change camera source
-        cameraName = sender.title
-        window.contentView = NSHostingView(
-          rootView: ContentView(cameraName: cameraName)
-        )
-        // Save preference in UserDefaults
-        UserDefaults.standard.set(cameraName, forKey: "cameraSource")
+  @objc func changeCameraSource(_ sender: NSMenuItem) {
+    // Uncheck all items
+    for item in sender.menu!.items {
+      item.state = .off
     }
+
+    // Check selected item
+    sender.state = .on
+
+    // Change camera source
+    cameraName = sender.title
+    window.contentView = NSHostingView(
+      rootView: ContentView(cameraName: cameraName)
+    )
+    // Save preference in UserDefaults
+    UserDefaults.standard.set(cameraName, forKey: "cameraSource")
+  }
+
+  @objc func screenSelected(_ sender: NSMenuItem) {
+    let currentScreen = UserDefaults.standard.string(forKey: "windowScreenUUID")
+    let selectedScreen = sender.representedObject as? String
+    if (currentScreen == selectedScreen) {
+        return
+    }
+    // Update the preference in UserDefaults
+    UserDefaults.standard.set(selectedScreen, forKey: "windowScreenUUID")
+
+    // Update the menu item state
+    for menuItem in sender.menu?.items ?? [] {
+        menuItem.state = menuItem == sender ? .on : .off
+    }
+
+    // Display a dialog to prompt the user to restart the app
+    let alert = NSAlert()
+    alert.messageText = "Restart Required"
+    alert.informativeText = "Please restart the app for the changes to take effect."
+    alert.alertStyle = .informational
+    alert.addButton(withTitle: "OK")
+    alert.runModal()
+  }
 }
 
 class DraggableWindow: NSWindow {
@@ -159,8 +220,7 @@ class DraggableWindow: NSWindow {
   }
 
   override func mouseDragged(with event: NSEvent) {
-    let windowFrame = self.frame
-    var newOrigin = windowFrame.origin
+    var newOrigin = self.frame.origin
 
     // Get the mouse location in window coordinates.
     let currentLocation = event.locationInWindow
@@ -172,6 +232,27 @@ class DraggableWindow: NSWindow {
 
     // Move the window to the new location
     self.setFrameOrigin(newOrigin)
+
+    // Compute the x/y distance to the nearest edge of the screen
+    guard let screen = self.screen else { return }
+    let xDistances = [
+        abs(newOrigin.x - screen.frame.minX), // Left
+        abs(newOrigin.x - screen.frame.maxX)  // Right
+    ]
+    let yDistances = [
+        abs(newOrigin.y - screen.frame.minY), // Bottom
+        abs(newOrigin.y - screen.frame.maxY)  // Top
+    ]
+    let minXDistance = xDistances.min()!
+    let minYDistance = yDistances.min()!
+    let xEdgeIndex = xDistances.firstIndex(of: minXDistance)!
+    let yEdgeIndex = yDistances.firstIndex(of: minYDistance)!
+
+    // Save the distance to the nearest edge and the edge index
+    UserDefaults.standard.set(minXDistance, forKey: "windowXDistanceToEdge")
+    UserDefaults.standard.set(minYDistance, forKey: "windowYDistanceToEdge")
+    UserDefaults.standard.set(xEdgeIndex, forKey: "windowXEdgeIndex")
+    UserDefaults.standard.set(yEdgeIndex, forKey: "windowYEdgeIndex")
   }
 
   override var contentView: NSView? {
