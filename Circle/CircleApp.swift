@@ -121,6 +121,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     window.makeKeyAndOrderFront(nil)
     window.level = .floating
 
+    // Make the window's content view layer-backed
+    window.contentView?.wantsLayer = true
+    updateWindowShape()
+
     // Create "Camera source" submenu
     let cameraMenu = NSMenu(title: "Camera source")
 
@@ -168,6 +172,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let menuBarItem = NSMenuItem(title: "Target screen", action: nil, keyEquivalent: "")
     menuBarItem.submenu = screenMenu
     mainMenu.addItem(menuBarItem)
+
+    // Create "Window Radius" submenu
+    let radiusMenu = NSMenu(title: "Window Radius")
+
+    // Add menu items for different radius values
+    for radius in [0, 5, 10, 25, 100] {
+      let menuItem = NSMenuItem(title: "\(radius)%", action: #selector(windowRadiusChanged(_:)), keyEquivalent: "")
+      menuItem.representedObject = radius
+      menuItem.state = radius == UserDefaults.standard.integer(forKey: "windowRadius") ? .on : .off
+      radiusMenu.addItem(menuItem)
+    }
+
+    // Add "Window Radius" submenu to the menu bar
+    let radiusMenuItem = NSMenuItem(title: "Window Radius", action: nil, keyEquivalent: "")
+    radiusMenuItem.submenu = radiusMenu
+    mainMenu.addItem(radiusMenuItem)
   }
 
   @objc func changeCameraSource(_ sender: NSMenuItem) {
@@ -209,6 +229,36 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     alert.alertStyle = .informational
     alert.addButton(withTitle: "OK")
     alert.runModal()
+  }
+
+  @objc func windowRadiusChanged(_ sender: NSMenuItem) {
+    // Update the window radius
+    let radius = sender.representedObject as! Int
+    UserDefaults.standard.set(radius, forKey: "windowRadius")
+
+    // Update the menu item state
+    for menuItem in sender.menu?.items ?? [] {
+        menuItem.state = menuItem == sender ? .on : .off
+    }
+
+    // Update the window shape
+    updateWindowShape()
+  }
+
+  func updateWindowShape() {
+    guard let contentView = window.contentView else { return }
+
+    // Get the window radius
+    let radiusPercentage = UserDefaults.standard.integer(forKey: "windowRadius")
+
+    // Calculate the window corner radius
+    let cornerRadius = CGFloat(radiusPercentage) / 100.0 * min(contentView.frame.width, contentView.frame.height) / 2.0
+
+    // Set the corner radius
+    contentView.layer?.cornerRadius = cornerRadius
+
+    // Update the shadow to match the new shape
+    window.invalidateShadow()
   }
 }
 
