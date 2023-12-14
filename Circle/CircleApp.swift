@@ -325,7 +325,6 @@ struct ContentView: View {
     CameraView(cameraName: cameraName)
       .frame(width: width, height: height)
       .background(Color.clear)
-      .clipShape(Circle())
   }
 }
 
